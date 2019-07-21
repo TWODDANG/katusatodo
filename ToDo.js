@@ -40,7 +40,9 @@ export default class ToDo extends React.Component{
                        multiline={true}
                     onChangeText={this._controlInput}
                     returnKeyType={'done'}
-                    onBlur={this._finishEditing}/>
+                    onBlur={this._finishEditing}
+                               underlineColorAndroid={'transparent'}
+                    />
                 ) : (<Text style={[styles.text,
                     isCompleted ? styles.completedText : styles.uncompletedText
                     ]}
@@ -65,7 +67,10 @@ export default class ToDo extends React.Component{
                                     </Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPressOut={()=>deleteToDo(id)}>
+                            <TouchableOpacity onPressOut={(event)=>{
+                                event.stopPropagation();
+                                deleteToDo(id);
+                            }}>
                                 <View style={styles.actionContainer}>
                                     <Text style={styles.actionText}>
                                         ❌
@@ -79,7 +84,8 @@ export default class ToDo extends React.Component{
             );
     }
 
-   _toggleComplete = () => {
+   _toggleComplete = (event) => {
+        event.stopPropagation();
        const {isCompleted, uncompleteToDo, completeToDo, id} = this.props;
        if(isCompleted){
            uncompleteToDo(id);
@@ -88,13 +94,15 @@ export default class ToDo extends React.Component{
        }
    };
 
-    _startEditing = () => {
+    _startEditing = (event) => {
+        event.stopPropagation();
         this.setState({
             isEditing: true,
         });
     };
 
-    _finishEditing = () => {
+    _finishEditing = (event) => {
+        event.stopPropagation();
         const {toDoValue} = this.state;
         const {id, updateToDo} = this.props;
         updateToDo(id, toDoValue);

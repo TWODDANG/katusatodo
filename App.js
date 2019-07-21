@@ -45,10 +45,15 @@ export default class App extends React.Component{
             returnKeyType={'done'}
             autoCorrect={false}
             onSubmitEditing={this._addToDo}
+                       underlineColorAndroid={'transparent'}
             />
             <ScrollView contentContainerStyle={styles.toDos}>
-              {Object.values(toDos).reverse().
-                  map(toDo => <ToDo key={toDo.id} {...toDo}
+              {Object.values(toDos)
+                  .sort(function (a, b) {
+                if(a.hasOwnProperty('createdAt')){
+                  return a.createdAt - b.createdAt;
+                }
+              }).map(toDo => <ToDo key={toDo.id} {...toDo}
               deleteToDo={this._deleteToDo}
               uncompleteToDo={this._uncompleteToDo}
               completeToDo={this._completeToDo}
@@ -70,11 +75,9 @@ export default class App extends React.Component{
    try{
      const toDos = await AsyncStorage.getItem('toDos');
      const parsedToDos = JSON.parse(toDos);
-     console.log('loadToDo 했다');
-     console.log(toDos);
      this.setState({
        loadedToDos: true,
-       toDos: parsedToDos,
+       toDos: parsedToDos || {},
      });
    }catch(err){
      console.log(err);
@@ -122,34 +125,18 @@ export default class App extends React.Component{
   };
 
   _uncompleteToDo = (id) => {
-    this.setState(PrevState =>{
-      const newState = {
-        ...prevState,
-        toDos: {
-          ...prevState.toDos[id],
-          [id] : {
-            ...prevState.toDos[id],
-            isCompleted: false
-          }
-        }
-      };
+    this.setState(prevState =>{
+      let newState = prevState;
+      newState.toDos[id].isCompleted = false;
       this._saveToDos(newState.toDos);
       return {...newState};
     });
   };
 
   _completeToDo = (id) => {
-    this.setState(PrevState =>{
-      const newState = {
-        ...prevState,
-        toDos: {
-          ...prevState.toDos[id],
-          [id] : {
-            ...prevState.toDos[id],
-            isCompleted: true
-          }
-        }
-      };
+    this.setState(prevState =>{
+      let newState = prevState;
+      newState.toDos[id].isCompleted = true;
       this._saveToDos(newState.toDos);
       return {...newState};
     });
@@ -157,16 +144,8 @@ export default class App extends React.Component{
 
   _updateToDo = (id, text) => {
     this.setState(prevState => {
-      const newState={
-        ...prevState,
-        toDos: {
-          ...prevState.toDos,
-          [id]: {
-            ...prevState.toDos[id],
-            text: text,
-          }
-        }
-      };
+      let newState = prevState;
+      newState.toDos[id].text = text;
       this._saveToDos(newState.toDos);
       return {...newState};
     });
